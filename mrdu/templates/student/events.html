@@ -1,0 +1,45 @@
+{% extends "student/base_student.html" %}
+{% block page_title %}Events{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h2>University Events</h2><p>Stay updated with campus activities</p></div>
+</div>
+
+{% if events %}
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
+  {% for ev in events %}
+  {% set type_colors = {'exam': ('#ffebee','#b71c1c','#ef9a9a'), 'cultural': ('#f3e5f5','#7b1fa2','#ce93d8'), 'sports': ('#e8f5e9','#2e7d32','#a5d6a7'), 'holiday': ('#fff8e1','#e65100','#ffe082'), 'seminar': ('#e3f2fd','#01579b','#90caf9'), 'workshop': ('#f3e5f5','#4a148c','#ce93d8')} %}
+  {% set bg, fg, border = type_colors.get(ev.event_type, ('#f5f5f5','#424242','#e0e0e0')) %}
+  <div class="card" style="border-top:4px solid {{ fg }}">
+    <div class="card-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <span class="badge" style="background:{{ bg }};color:{{ fg }}">{{ ev.event_type|title }}</span>
+        {% if ev.start_date %}
+        <div style="text-align:right">
+          <p style="font-size:18px;font-weight:800;color:{{ fg }};line-height:1">{{ ev.start_date.strftime('%d') }}</p>
+          <p style="font-size:11px;color:var(--text-muted)">{{ ev.start_date.strftime('%b %Y') }}</p>
+        </div>
+        {% endif %}
+      </div>
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px">{{ ev.title }}</h3>
+      {% if ev.description %}<p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:10px">{{ ev.description[:120] }}{% if ev.description|length > 120 %}...{% endif %}</p>{% endif %}
+      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--text-muted)">
+        {% if ev.start_date %}<span><i class="fas fa-clock" style="margin-right:4px"></i>{{ ev.start_date.strftime('%I:%M %p') }}</span>{% endif %}
+        {% if ev.venue %}<span><i class="fas fa-map-marker-alt" style="margin-right:4px"></i>{{ ev.venue }}</span>{% endif %}
+        {% if ev.end_date and ev.end_date != ev.start_date %}<span><i class="fas fa-calendar-times" style="margin-right:4px"></i>Until {{ ev.end_date.strftime('%d %b') }}</span>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="card-body" style="text-align:center;padding:60px;color:var(--text-muted)">
+    <i class="fas fa-calendar-alt" style="font-size:50px;opacity:0.15;display:block;margin-bottom:16px"></i>
+    <h3 style="font-weight:700;margin-bottom:8px">No Events Scheduled</h3>
+    <p>There are no upcoming events right now. Check back later!</p>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

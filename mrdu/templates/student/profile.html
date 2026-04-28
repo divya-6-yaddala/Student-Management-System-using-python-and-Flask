@@ -1,0 +1,83 @@
+{% extends "student/base_student.html" %}
+{% block page_title %}My Profile{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h2>My Profile</h2><p>View your student information</p></div>
+</div>
+
+<div class="grid-2">
+  <div>
+    <div class="card mb-3">
+      <div class="card-body" style="text-align:center;padding:30px">
+        <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;color:white;font-size:36px;font-weight:800;margin:0 auto 16px;box-shadow:0 4px 20px rgba(26,35,126,0.3)">{{ student.user.full_name[0] }}</div>
+        <h3 style="font-size:20px;font-weight:800">{{ student.user.full_name }}</h3>
+        <p style="color:var(--text-muted);font-size:13px;margin:4px 0">{{ student.user.email }}</p>
+        <div style="display:flex;justify-content:center;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <span class="badge badge-info">{{ student.course }}</span>
+          <span class="badge badge-purple">Year {{ student.year }}</span>
+          <span class="badge badge-{{ 'success' if student.attendance_percentage >= 75 else 'danger' }}">{{ student.attendance_percentage }}% Attendance</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><h3>Personal Information</h3></div>
+      <div class="card-body">
+        {% for label, value in [
+          ('Roll Number', student.roll_number),
+          ('Admission No.', student.admission_number or '—'),
+          ('Date of Birth', student.date_of_birth.strftime('%d %B %Y') if student.date_of_birth else '—'),
+          ('Gender', student.gender or '—'),
+          ('Blood Group', student.blood_group or '—'),
+          ('Phone', student.phone or '—'),
+          ('Address', (student.address or '') + (', ' + student.city if student.city else '') + (', ' + student.state if student.state else '')),
+        ] %}
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13.5px">
+          <span style="color:var(--text-muted);font-weight:500">{{ label }}</span>
+          <span style="font-weight:600;max-width:60%;text-align:right">{{ value }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card mb-3">
+      <div class="card-header"><h3>Academic Details</h3></div>
+      <div class="card-body">
+        {% for label, value in [
+          ('Department', student.department or '—'),
+          ('Course', student.course or '—'),
+          ('Year', 'Year ' + student.year|string),
+          ('Semester', 'Semester ' + student.semester|string),
+          ('Section', student.section or '—'),
+          ('Admission Date', student.admission_date.strftime('%d %B %Y') if student.admission_date else '—'),
+        ] %}
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13.5px">
+          <span style="color:var(--text-muted);font-weight:500">{{ label }}</span>
+          <span style="font-weight:600">{{ value }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Parent / Guardian</h3></div>
+      <div class="card-body">
+        {% for label, value in [
+          ('Name', student.parent_name or '—'),
+          ('Relation', student.parent_relation or '—'),
+          ('Phone', student.parent_phone or '—'),
+          ('Email', student.parent_email or '—'),
+        ] %}
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13.5px">
+          <span style="color:var(--text-muted);font-weight:500">{{ label }}</span>
+          <span style="font-weight:600">{{ value }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

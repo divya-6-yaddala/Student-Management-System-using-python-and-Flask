@@ -1,0 +1,83 @@
+{% extends "student/base_student.html" %}
+{% block page_title %}My Fees{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h2>My Fee Details</h2><p>View fee records and payment status</p></div>
+</div>
+
+<!-- Summary Stats -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-icon ic-blue"><i class="fas fa-file-invoice-dollar"></i></div>
+    <div><h4>₹{{ "{:,.0f}".format(total_due) }}</h4><p>Total Due</p></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon ic-green"><i class="fas fa-check-circle"></i></div>
+    <div><h4>₹{{ "{:,.0f}".format(total_paid) }}</h4><p>Total Paid</p></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon {% if total_balance > 0 %}ic-red{% else %}ic-green{% endif %}"><i class="fas fa-rupee-sign"></i></div>
+    <div><h4>₹{{ "{:,.0f}".format(total_balance) }}</h4><p>Balance Due</p></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon ic-orange"><i class="fas fa-percentage"></i></div>
+    <div><h4>{{ ((total_paid / total_due * 100)|round(1)) if total_due else 0 }}%</h4><p>Paid</p></div>
+  </div>
+</div>
+
+{% if total_balance > 0 %}
+<div style="background:#fff8e1;border:1.5px solid #ffe082;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
+  <i class="fas fa-exclamation-triangle" style="color:#e65100;font-size:20px"></i>
+  <div>
+    <p style="font-weight:700;color:#e65100">Outstanding Balance: ₹{{ "{:,.0f}".format(total_balance) }}</p>
+    <p style="font-size:13px;color:#bf360c">Please contact the Accounts Office or pay at the fee counter. Late payment may attract a penalty.</p>
+  </div>
+</div>
+{% else %}
+<div style="background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
+  <i class="fas fa-check-circle" style="color:var(--success);font-size:20px"></i>
+  <p style="font-weight:600;color:var(--success)">All fees are cleared! No outstanding balance.</p>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-header"><h3>Fee Records</h3></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Fee Type</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Paid On</th><th>Status</th><th>Receipt</th></tr>
+      </thead>
+      <tbody>
+        {% for f in fees %}
+        <tr>
+          <td style="font-weight:600">{{ f.fee_type }}</td>
+          <td>₹{{ "{:,.0f}".format(f.amount) }}</td>
+          <td style="color:var(--success);font-weight:600">₹{{ "{:,.0f}".format(f.amount_paid) }}</td>
+          <td style="color:{% if f.balance > 0 %}var(--danger){% else %}var(--success){% endif %};font-weight:700">₹{{ "{:,.0f}".format(f.balance) }}</td>
+          <td style="font-size:12px">{{ f.due_date.strftime('%d %b %Y') if f.due_date else '—' }}</td>
+          <td style="font-size:12px">{{ f.paid_date.strftime('%d %b %Y') if f.paid_date else '—' }}</td>
+          <td><span class="badge badge-{{ 'success' if f.status=='paid' else 'warning' if f.status=='partial' else 'danger' }}">{{ f.status }}</span></td>
+          <td style="font-size:12px;color:var(--text-muted)">{{ f.receipt_number or '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">
+          <i class="fas fa-receipt" style="font-size:40px;opacity:0.15;display:block;margin-bottom:12px"></i>
+          No fee records found.
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mt-3" style="background:linear-gradient(135deg,#f8f9ff,#eef0fb)">
+  <div class="card-body">
+    <h4 style="font-size:14px;font-weight:700;color:var(--primary);margin-bottom:8px"><i class="fas fa-info-circle" style="margin-right:6px"></i>Fee Payment Information</h4>
+    <p style="font-size:13px;color:var(--text-muted);line-height:1.7">
+      For fee payment, visit the MRDU Accounts Office (Admin Block, Ground Floor) between 9:00 AM – 4:00 PM, Monday to Saturday.
+      Online payment is available via the university payment portal. For queries, call: <strong>040-XXXXXXXX</strong> or email: <strong>accounts@mrdu.edu.in</strong>.
+    </p>
+  </div>
+</div>
+{% endblock %}

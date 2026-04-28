@@ -1,0 +1,104 @@
+{% extends "student/base_student.html" %}
+{% block page_title %}My Marks{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h2>My Marks & Grades</h2><p>View exam results and performance</p></div>
+</div>
+
+<!-- Filter -->
+<div class="card mb-3">
+  <div class="card-body" style="padding:16px 22px">
+    <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+      <div class="form-group" style="margin:0;min-width:160px">
+        <label class="form-label">Semester</label>
+        <select name="semester" class="form-control form-select">
+          <option value="">All Semesters</option>
+          {% for s in semesters %}<option value="{{ s }}" {{ 'selected' if request.args.get('semester')|int == s }}>Sem {{ s }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;min-width:160px">
+        <label class="form-label">Exam Type</label>
+        <select name="exam_type" class="form-control form-select">
+          <option value="">All Exams</option>
+          {% for et in exam_types %}<option value="{{ et }}" {{ 'selected' if request.args.get('exam_type')==et }}>{{ et }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary" style="height:40px">Filter</button>
+      <a href="{{ url_for('student.marks') }}" class="btn btn-outline" style="height:40px">Reset</a>
+    </form>
+  </div>
+</div>
+
+<!-- Summary Cards -->
+{% if summary %}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:24px">
+  {% for key, val in summary.items() %}
+  {% set avg = (val.obtained / val.total * 100)|round(1) if val.total else 0 %}
+  <div class="card" style="border-top:3px solid {% if avg >= 75 %}var(--success){% elif avg >= 50 %}var(--accent){% else %}var(--danger){% endif %}">
+    <div class="card-body" style="padding:16px">
+      <p style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">{{ key }}</p>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h4 style="font-size:22px;font-weight:800;color:{% if avg >= 75 %}var(--success){% elif avg >= 50 %}var(--accent){% else %}var(--danger){% endif %}">{{ avg }}%</h4>
+          <p style="font-size:12px;color:var(--text-muted)">{{ val.obtained }}/{{ val.total }} ({{ val.count }} subjects)</p>
+        </div>
+        <div class="progress-bar" style="width:70px;transform:rotate(-90deg)">
+          <div class="progress-fill" style="width:{{ avg }}%;background:{% if avg >= 75 %}var(--success){% elif avg >= 50 %}var(--accent){% else %}var(--danger){% endif %}"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Marks Table -->
+<div class="card">
+  <div class="card-header"><h3>Detailed Results</h3></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Subject</th><th>Exam Type</th><th>Sem</th><th>Marks</th><th>Percentage</th><th>Grade</th><th>Year</th></tr></thead>
+      <tbody>
+        {% for m in marks %}
+        {% set pct = (m.marks_obtained / m.max_marks * 100)|round(1) %}
+        <tr>
+          <td style="font-weight:600">{{ m.subject.name }}<br><span style="font-size:11px;color:var(--text-muted)">{{ m.subject.code }}</span></td>
+          <td>{{ m.exam_type }}</td>
+          <td>Sem {{ m.semester }}</td>
+          <td style="font-weight:700">{{ m.marks_obtained }}<span style="color:var(--text-muted);font-weight:400">/{{ m.max_marks }}</span></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="progress-bar" style="width:60px"><div class="progress-fill" style="width:{{ pct }}%;background:{% if pct>=75 %}var(--success){% elif pct>=50 %}var(--accent){% else %}var(--danger){% endif %}"></div></div>
+              <span style="font-size:12px;font-weight:600">{{ pct }}%</span>
+            </div>
+          </td>
+          <td>
+            <span class="badge" style="background:{% if m.grade=='O' %}#e8f5e9{% elif m.grade in ['A+','A'] %}#e3f2fd{% elif m.grade in ['B+','B'] %}#fff8e1{% elif m.grade=='C' %}#fff3e0{% else %}#ffebee{% endif %};color:{% if m.grade=='F' %}var(--danger){% elif m.grade=='C' %}#e65100{% else %}var(--success){% endif %}">{{ m.grade }}</span>
+          </td>
+          <td style="font-size:12px;color:var(--text-muted)">{{ m.academic_year }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">
+          <i class="fas fa-chart-bar" style="font-size:40px;opacity:0.15;display:block;margin-bottom:12px"></i>
+          No marks recorded yet.
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Grade Legend -->
+<div class="card mt-3">
+  <div class="card-header"><h3>Grade Scale</h3></div>
+  <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap">
+    {% for g, r, c in [('O','90-100','#2e7d32'),('A+','80-89','#1565c0'),('A','70-79','#00838f'),('B+','60-69','#e65100'),('B','50-59','#bf360c'),('C','40-49','#6d4c41'),('F','<40','#b71c1c')] %}
+    <div style="text-align:center;padding:10px 16px;border-radius:10px;background:{{ c }}15;border:1.5px solid {{ c }}30">
+      <div style="font-size:18px;font-weight:800;color:{{ c }}">{{ g }}</div>
+      <div style="font-size:11px;color:var(--text-muted)">{{ r }}%</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

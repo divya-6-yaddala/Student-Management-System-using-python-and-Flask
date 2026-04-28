@@ -1,0 +1,137 @@
+{% extends "admin/base_admin.html" %}
+{% block page_title %}Student Profile{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h2>{{ student.user.full_name }}</h2><p>{{ student.roll_number }} · {{ student.department }}</p></div>
+  <div style="display:flex;gap:10px">
+    <a href="{{ url_for('admin.edit_student', sid=student.id) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Edit</a>
+    <a href="{{ url_for('admin.students') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- Profile Card -->
+  <div>
+    <div class="card mb-3">
+      <div class="card-body" style="text-align:center;padding:30px">
+        <div style="width:80px;height:80px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-size:32px;font-weight:800;margin:0 auto 16px">{{ student.user.full_name[0] }}</div>
+        <h3 style="font-size:18px;font-weight:800">{{ student.user.full_name }}</h3>
+        <p style="color:var(--text-muted);font-size:13px;margin-top:4px">{{ student.user.email }}</p>
+        <div style="display:flex;justify-content:center;gap:10px;margin-top:14px;flex-wrap:wrap">
+          <span class="badge badge-info">{{ student.course }}</span>
+          <span class="badge badge-purple">{{ student.department }}</span>
+          <span class="badge badge-{{ 'success' if student.attendance_percentage >= 75 else 'danger' }}">{{ student.attendance_percentage }}% Attendance</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><h3>Personal Info</h3></div>
+      <div class="card-body">
+        {% set infos = [
+          ('Roll Number', student.roll_number),
+          ('Admission No', student.admission_number or '—'),
+          ('Date of Birth', student.date_of_birth.strftime('%d %B %Y') if student.date_of_birth else '—'),
+          ('Gender', student.gender or '—'),
+          ('Blood Group', student.blood_group or '—'),
+          ('Phone', student.phone or '—'),
+          ('Address', student.address or '—'),
+          ('City', student.city or '—'),
+          ('State', student.state or '—'),
+          ('Pincode', student.pincode or '—')
+        ] %}
+        {% for label, value in infos %}
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px">
+          <span style="color:var(--text-muted);font-weight:500">{{ label }}</span>
+          <span style="font-weight:600;color:var(--text)">{{ value }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Parent / Guardian</h3></div>
+      <div class="card-body">
+        {% set parent_infos = [
+          ('Name', student.parent_name or '—'),
+          ('Relation', student.parent_relation or '—'),
+          ('Phone', student.parent_phone or '—'),
+          ('Email', student.parent_email or '—')
+        ] %}
+        {% for label, value in parent_infos %}
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px">
+          <span style="color:var(--text-muted);font-weight:500">{{ label }}</span>
+          <span style="font-weight:600">{{ value }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Academic Info -->
+  <div>
+    <div class="card mb-3">
+      <div class="card-header"><h3>Academic Info</h3></div>
+      <div class="card-body">
+        {% set ac_infos = [
+          ('Year', 'Year ' + student.year|string),
+          ('Semester', 'Semester ' + student.semester|string),
+          ('Section', student.section or '—'),
+          ('Admission Date', student.admission_date.strftime('%d %B %Y') if student.admission_date else '—')
+        ] %}
+        {% for label, value in ac_infos %}
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px">
+          <span style="color:var(--text-muted);font-weight:500">{{ label }}</span>
+          <span style="font-weight:600">{{ value }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Recent Marks -->
+    <div class="card mb-3">
+      <div class="card-header"><h3>Recent Marks</h3></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Subject</th><th>Exam</th><th>Marks</th><th>Grade</th></tr></thead>
+          <tbody>
+            {% for m in student.marks[-5:] %}
+            <tr>
+              <td>{{ m.subject.name }}</td>
+              <td>{{ m.exam_type }}</td>
+              <td>{{ m.marks_obtained }}/{{ m.max_marks }}</td>
+              <td><span class="badge badge-{{ 'success' if m.grade not in ['F','C'] else 'danger' if m.grade == 'F' else 'warning' }}">{{ m.grade }}</span></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">No marks recorded</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Fee Summary -->
+    <div class="card">
+      <div class="card-header"><h3>Fee Summary</h3></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Type</th><th>Due</th><th>Paid</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for f in student.fees %}
+            <tr>
+              <td>{{ f.fee_type }}</td>
+              <td>₹{{ "{:,.0f}".format(f.amount) }}</td>
+              <td>₹{{ "{:,.0f}".format(f.amount_paid) }}</td>
+              <td><span class="badge badge-{{ 'success' if f.status=='paid' else 'warning' if f.status=='partial' else 'danger' }}">{{ f.status }}</span></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">No fee records</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo-circle">M</div>
+    <h2>MRDU Portal</h2>
+    <p>Admin Dashboard</p>
+  </div>
+  <nav>
+    <div class="nav-section">Main</div>
+    <a href="{{ url_for('admin.dashboard') }}" class="nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
+
+    <div class="nav-section">Academics</div>
+    <a href="{{ url_for('admin.students') }}" class="nav-item"><i class="fas fa-user-graduate"></i> Students</a>
+    <a href="{{ url_for('admin.add_student') }}" class="nav-item"><i class="fas fa-user-plus"></i> Add Student</a>
+    <a href="{{ url_for('admin.attendance') }}" class="nav-item"><i class="fas fa-calendar-check"></i> Attendance</a>
+    <a href="{{ url_for('admin.marks') }}" class="nav-item"><i class="fas fa-chart-bar"></i> Marks & Grades</a>
+    <a href="{{ url_for('admin.subjects') }}" class="nav-item"><i class="fas fa-book"></i> Subjects</a>
+    <a href="{{ url_for('admin.timetable') }}" class="nav-item"><i class="fas fa-clock"></i> Timetable</a>
+
+    <div class="nav-section">Finance</div>
+    <a href="{{ url_for('admin.fees') }}" class="nav-item"><i class="fas fa-rupee-sign"></i> Fee Management</a>
+
+    <div class="nav-section">Communication</div>
+    <a href="{{ url_for('admin.notifications') }}" class="nav-item"><i class="fas fa-bell"></i> Notifications</a>
+    <a href="{{ url_for('admin.events') }}" class="nav-item"><i class="fas fa-calendar-alt"></i> Events</a>
+
+    <div class="nav-section">Account</div>
+    <a href="{{ url_for('auth.change_password') }}" class="nav-item"><i class="fas fa-key"></i> Change Password</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">{{ current_user.full_name[0] }}</div>
+      <div class="user-info">
+        <p>{{ current_user.full_name }}</p>
+        <span>Administrator</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main-wrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+      <p>Mallareddy Deemed University — Admin Portal</p>
+    </div>
+    <div class="topbar-right">
+      <a href="{{ url_for('admin.notifications') }}" class="topbar-btn" title="Notifications"><i class="fas fa-bell"></i></a>
+      <a href="{{ url_for('auth.logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+  </div>
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "admin/base_admin.html" %}
+{% block page_title %}Fee Management{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h2>Fee Management</h2><p>Track payments and generate receipts</p></div>
+</div>
+
+<!-- Summary Stats -->
+<div class="stat-grid mb-3">
+  {% set total_due = fees|sum(attribute='amount') %}
+  {% set total_paid = fees|sum(attribute='amount_paid') %}
+  <div class="stat-card">
+    <div class="stat-icon ic-blue"><i class="fas fa-file-invoice-dollar"></i></div>
+    <div><h4>{{ fees|length }}</h4><p>Total Records</p></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon ic-orange"><i class="fas fa-rupee-sign"></i></div>
+    <div><h4>₹{{ "{:,.0f}".format(total_due) }}</h4><p>Total Due</p></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon ic-green"><i class="fas fa-check-circle"></i></div>
+    <div><h4>₹{{ "{:,.0f}".format(total_paid) }}</h4><p>Collected</p></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon ic-red"><i class="fas fa-exclamation-triangle"></i></div>
+    <div><h4>₹{{ "{:,.0f}".format(total_due - total_paid) }}</h4><p>Pending</p></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- Add Fee -->
+  <div class="card">
+    <div class="card-header"><h3><i class="fas fa-plus-circle" style="color:var(--primary);margin-right:8px"></i>Add Fee Record</h3></div>
+    <div class="card-body">
+      <form method="POST">
+        <input type="hidden" name="action" value="add">
+        <div class="form-group">
+          <label class="form-label">Student *</label>
+          <select name="student_id" class="form-control form-select" required>
+            <option value="">Select Student</option>
+            {% for s in students %}<option value="{{ s.id }}">{{ s.user.full_name }} ({{ s.roll_number }})</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Fee Type *</label>
+            <select name="fee_type" class="form-control form-select" required>
+              {% for ft in ['Tuition Fee','Examination Fee','Hostel Fee','Transportation Fee','Library Fee','Laboratory Fee','Activity Fee','Other'] %}
+              <option>{{ ft }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (₹) *</label>
+            <input type="number" name="amount" class="form-control" required min="1" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Due Date</label>
+            <input type="date" name="due_date" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Academic Year</label>
+            <input type="text" name="academic_year" class="form-control" value="2024-25">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%"><i class="fas fa-plus"></i> Add & Notify</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Record Payment -->
+  <div class="card">
+    <div class="card-header"><h3><i class="fas fa-rupee-sign" style="color:var(--success);margin-right:8px"></i>Record Payment</h3></div>
+    <div class="card-body">
+      <form method="POST">
+        <input type="hidden" name="action" value="pay">
+        <div class="form-group">
+          <label class="form-label">Fee Record *</label>
+          <select name="fee_id" class="form-control form-select" required>
+            <option value="">Select Fee Record</option>
+            {% for f in fees %}{% if f.status != 'paid' %}
+            <option value="{{ f.id }}">{{ f.student.user.full_name }} — {{ f.fee_type }} (₹{{ "{:,.0f}".format(f.balance) }} due)</option>
+            {% endif %}{% endfor %}
+          </select>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Amount Paying (₹) *</label>
+            <input type="number" name="pay_amount" class="form-control" required min="1" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Transaction ID</label>
+            <input type="text" name="transaction_id" class="form-control" placeholder="UTR/Cheque No.">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-success" style="width:100%"><i class="fas fa-check"></i> Record Payment & Send Receipt</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Fee Records Table -->
+<div class="card mt-3">
+  <div class="card-header"><h3>All Fee Records</h3></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Student</th><th>Fee Type</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Status</th><th>Receipt</th></tr>
+      </thead>
+      <tbody>
+        {% for f in fees %}
+        <tr>
+          <td>
+            <div style="font-weight:600">{{ f.student.user.full_name }}</div>
+            <div style="font-size:12px;color:var(--text-muted)">{{ f.student.roll_number }}</div>
+          </td>
+          <td>{{ f.fee_type }}</td>
+          <td>₹{{ "{:,.0f}".format(f.amount) }}</td>
+          <td style="color:var(--success);font-weight:600">₹{{ "{:,.0f}".format(f.amount_paid) }}</td>
+          <td style="color:{% if f.balance > 0 %}var(--danger){% else %}var(--success){% endif %};font-weight:600">₹{{ "{:,.0f}".format(f.balance) }}</td>
+          <td style="font-size:12px">{{ f.due_date.strftime('%d %b %Y') if f.due_date else '—' }}</td>
+          <td><span class="badge badge-{{ 'success' if f.status=='paid' else 'warning' if f.status=='partial' else 'danger' }}">{{ f.status }}</span></td>
+          <td style="font-size:12px;color:var(--text-muted)">{{ f.receipt_number or '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:30px">No fee records found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

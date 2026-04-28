@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo-circle">M</div>
+    <h2>MRDU Portal</h2>
+    <p>Student Dashboard</p>
+  </div>
+  <nav>
+    <div class="nav-section">My Portal</div>
+    <a href="{{ url_for('student.dashboard') }}" class="nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
+    <a href="{{ url_for('student.profile') }}" class="nav-item"><i class="fas fa-user"></i> My Profile</a>
+
+    <div class="nav-section">Academics</div>
+    <a href="{{ url_for('student.attendance') }}" class="nav-item"><i class="fas fa-calendar-check"></i> My Attendance</a>
+    <a href="{{ url_for('student.marks') }}" class="nav-item"><i class="fas fa-chart-bar"></i> My Marks</a>
+    <a href="{{ url_for('student.timetable') }}" class="nav-item"><i class="fas fa-clock"></i> Timetable</a>
+
+    <div class="nav-section">Finance</div>
+    <a href="{{ url_for('student.fees') }}" class="nav-item"><i class="fas fa-rupee-sign"></i> My Fees</a>
+
+    <div class="nav-section">Campus</div>
+    <a href="{{ url_for('student.events') }}" class="nav-item"><i class="fas fa-calendar-alt"></i> Events</a>
+
+    <div class="nav-section">Account</div>
+    <a href="{{ url_for('auth.change_password') }}" class="nav-item"><i class="fas fa-key"></i> Change Password</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">{{ current_user.full_name[0] }}</div>
+      <div class="user-info">
+        <p>{{ current_user.full_name }}</p>
+        <span>Student</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main-wrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+      <p>Mallareddy Deemed University — Student Portal</p>
+    </div>
+    <div class="topbar-right">
+      <a href="{{ url_for('student.events') }}" class="topbar-btn" title="Events"><i class="fas fa-calendar-alt"></i></a>
+      <a href="{{ url_for('auth.logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+  </div>
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

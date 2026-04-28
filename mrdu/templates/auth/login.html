@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — MRDU Student Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #1a237e; --primary-light: #283593; --accent: #ff6f00;
+      --bg: #f0f2f5; --card: #fff; --text: #1a1a2e; --border: #e5e7eb;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh; background: var(--primary-dark, #0d1257);
+      display: flex; overflow: hidden;
+    }
+    .left-panel {
+      flex: 1; background: linear-gradient(160deg, #0d1257 0%, #1a237e 50%, #283593 100%);
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: 40px; position: relative; overflow: hidden;
+    }
+    .left-panel::before {
+      content: ''; position: absolute; width: 500px; height: 500px; border-radius: 50%;
+      background: rgba(255,111,0,0.08); top: -150px; right: -150px;
+    }
+    .left-panel::after {
+      content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%;
+      background: rgba(255,255,255,0.04); bottom: -100px; left: -80px;
+    }
+    .brand { text-align: center; z-index: 1; }
+    .brand-logo {
+      width: 80px; height: 80px; border-radius: 22px; background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Sora', sans-serif; font-size: 34px; font-weight: 800;
+      color: white; margin: 0 auto 20px; box-shadow: 0 8px 30px rgba(255,111,0,0.4);
+    }
+    .brand h1 { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 800; color: white; line-height: 1.2; margin-bottom: 8px; }
+    .brand p { color: rgba(255,255,255,0.5); font-size: 14px; }
+    .brand-tagline { margin-top: 50px; text-align: center; z-index: 1; }
+    .brand-tagline h2 { font-size: 20px; font-weight: 700; color: white; margin-bottom: 8px; }
+    .brand-tagline p { color: rgba(255,255,255,0.4); font-size: 13px; line-height: 1.7; max-width: 300px; }
+    .features { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 40px; z-index: 1; }
+    .feature-chip {
+      display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 500;
+    }
+    .feature-chip i { color: var(--accent); font-size: 13px; }
+
+    .right-panel {
+      width: 480px; background: white; display: flex; flex-direction: column;
+      justify-content: center; padding: 50px 50px;
+    }
+    .login-header { margin-bottom: 32px; }
+    .login-header h2 { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+    .login-header p { font-size: 14px; color: #6b7280; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 7px; }
+    .input-wrap { position: relative; }
+    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; }
+    .form-control {
+      width: 100%; padding: 12px 14px 12px 40px; border: 1.5px solid var(--border);
+      border-radius: 10px; font-size: 14px; font-family: inherit; outline: none;
+      transition: all .2s; color: var(--text);
+    }
+    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,35,126,0.08); }
+    .form-footer { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+    .remember { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #6b7280; cursor: pointer; }
+    .remember input[type=checkbox] { accent-color: var(--primary); width: 15px; height: 15px; }
+
+    .btn-login {
+      width: 100%; padding: 13px; background: var(--primary); color: white;
+      border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+      font-family: inherit; cursor: pointer; transition: all .2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-login:hover { background: #0d1257; transform: translateY(-1px); box-shadow: 0 4px 15px rgba(26,35,126,0.3); }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: #d1d5db; font-size: 12px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .admin-hint { background: #f8f9ff; border: 1.5px solid #e8eaf6; border-radius: 10px; padding: 14px; font-size: 12.5px; color: #6b7280; }
+    .admin-hint strong { color: var(--primary); }
+    .flash-msg { padding: 11px 14px; border-radius: 9px; margin-bottom: 18px; font-size: 13.5px; font-weight: 500; }
+    .flash-danger { background: #ffebee; color: #b71c1c; border-left: 4px solid #b71c1c; }
+    .flash-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #2e7d32; }
+    .flash-info { background: #e3f2fd; color: #01579b; border-left: 4px solid #01579b; }
+
+    @media (max-width: 900px) {
+      .left-panel { display: none; }
+      .right-panel { width: 100%; padding: 40px 30px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="left-panel">
+    <div class="brand">
+      <div class="brand-logo">M</div>
+      <h1>Mallareddy Deemed<br>University</h1>
+      <p>Hyderabad, Telangana — Est. 2009</p>
+    </div>
+    <div class="brand-tagline">
+      <h2>Student Management Portal</h2>
+      <p>Seamlessly manage academics, attendance, fees & communications in one place.</p>
+    </div>
+    <div class="features">
+      <div class="feature-chip"><i class="fas fa-chart-bar"></i> Academic Tracking</div>
+      <div class="feature-chip"><i class="fas fa-calendar-check"></i> Attendance</div>
+      <div class="feature-chip"><i class="fas fa-rupee-sign"></i> Fee Management</div>
+      <div class="feature-chip"><i class="fas fa-bell"></i> Notifications</div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="login-header">
+      <h2>Welcome back 👋</h2>
+      <p>Sign in to your MRDU portal account</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="flash-msg flash-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+      <div class="form-group">
+        <label class="form-label">Username or Email</label>
+        <div class="input-wrap">
+          <i class="fas fa-user input-icon"></i>
+          <input type="text" name="username" class="form-control" placeholder="Enter username or email" required autofocus>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="input-wrap">
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" name="password" id="passInput" class="form-control" placeholder="Enter your password" required>
+          <i class="fas fa-eye" id="togglePass" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#9ca3af;cursor:pointer;font-size:14px"></i>
+        </div>
+      </div>
+      <div class="form-footer">
+        <label class="remember">
+          <input type="checkbox" name="remember"> Remember me
+        </label>
+      </div>
+      <button type="submit" class="btn-login">
+        <i class="fas fa-sign-in-alt"></i> Sign In to Portal
+      </button>
+    </form>
+
+    <div class="divider">Default Credentials</div>
+    <div class="admin-hint">
+      <strong>Admin Login:</strong> username: <code>admin</code> | password: <code>admin123</code><br>
+      <span style="margin-top:4px;display:block;">Students use their assigned username & password.</span>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('togglePass').addEventListener('click', function() {
+      const p = document.getElementById('passInput');
+      if (p.type === 'password') { p.type = 'text'; this.className = 'fas fa-eye-slash'; }
+      else { p.type = 'password'; this.className = 'fas fa-eye'; }
+      this.style.cssText = 'position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#9ca3af;cursor:pointer;font-size:14px';
+    });
+  </script>
+</body>
+</html>

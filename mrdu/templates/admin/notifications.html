@@ -1,0 +1,116 @@
+{% extends "admin/base_admin.html" %}
+{% block page_title %}Notifications{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h2>Send Notifications</h2><p>Email notifications to students and parents via SMTP</p></div>
+</div>
+
+<div class="grid-2">
+  <!-- Send Form -->
+  <div class="card">
+    <div class="card-header"><h3><i class="fas fa-paper-plane" style="color:var(--primary);margin-right:8px"></i>Send Notification</h3></div>
+    <div class="card-body">
+      <form method="POST" id="notifForm">
+        <div class="form-group">
+          <label class="form-label">Notification Type *</label>
+          <select name="notif_type" class="form-control form-select" required>
+            {% for t in ['General','Exam','Result','Fee Reminder','Event','Holiday','Emergency','Achievement'] %}
+            <option>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Send To *</label>
+          <select name="target" class="form-control form-select" id="targetSelect" required onchange="toggleTarget()">
+            <option value="all">All Students & Parents</option>
+            <option value="department">Specific Department</option>
+            <option value="student">Specific Student</option>
+          </select>
+        </div>
+        <div class="form-group" id="deptGroup" style="display:none">
+          <label class="form-label">Department</label>
+          <select name="target_value" id="deptSelect" class="form-control form-select">
+            {% for d in departments %}<option>{{ d }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group" id="studentGroup" style="display:none">
+          <label class="form-label">Roll Number</label>
+          <input type="text" name="target_value" id="studentInput" class="form-control" placeholder="e.g. MRDU2024CS001">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Title *</label>
+          <input type="text" name="title" class="form-control" required placeholder="Notification title">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message *</label>
+          <textarea name="message" class="form-control" rows="5" required placeholder="Write your notification message here..."></textarea>
+        </div>
+        <div style="background:#e8f5e9;border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--success);display:flex;align-items:center;gap:8px">
+          <i class="fas fa-envelope"></i>
+          Email will be sent via SMTP to students and parents (configure SMTP in config.py)
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%"><i class="fas fa-paper-plane"></i> Send Notification</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quick Templates -->
+  <div>
+    <div class="card mb-3">
+      <div class="card-header"><h3>Quick Templates</h3></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+        {% for tpl in [
+          ('Exam Schedule', 'Exam', 'Mid-Semester Examinations will commence from [Date]. Students are advised to check the timetable on the notice board and prepare accordingly.'),
+          ('Fee Reminder', 'Fee Reminder', 'This is a reminder that the fee payment deadline is approaching. Kindly ensure payment before the due date to avoid late fees.'),
+          ('Holiday Notice', 'Holiday', 'The university will remain closed on [Date] on account of [Occasion]. Classes will resume from [Next Date].'),
+          ('Result Published', 'Result', 'Results for [Exam Name] have been published. Students can view their marks on the student portal.')
+        ] %}
+        <button type="button" class="btn btn-outline" style="text-align:left;justify-content:flex-start"
+          onclick="fillTemplate('{{ tpl[0] }}', '{{ tpl[1] }}', '{{ tpl[2] }}')">
+          <i class="fas fa-file-alt" style="color:var(--primary);margin-right:8px"></i>{{ tpl[0] }}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>Notification History</h3></div>
+      <div style="max-height:400px;overflow-y:auto">
+        {% for n in notifications[:15] %}
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+            <span style="font-weight:700;font-size:13.5px">{{ n.title }}</span>
+            <span class="badge badge-{{ 'success' if n.email_sent else 'warning' }}">{{ 'Sent' if n.email_sent else 'Pending' }}</span>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px">{{ n.message[:80] }}{% if n.message|length > 80 %}...{% endif %}</p>
+          <div style="display:flex;gap:10px;font-size:11px;color:var(--text-muted)">
+            <span><i class="fas fa-tag"></i> {{ n.notification_type }}</span>
+            <span><i class="fas fa-users"></i> {{ n.target }}{% if n.target_value %}: {{ n.target_value }}{% endif %}</span>
+            <span><i class="fas fa-clock"></i> {{ n.created_at.strftime('%d %b, %H:%M') }}</span>
+          </div>
+        </div>
+        {% else %}
+        <div style="text-align:center;padding:30px;color:var(--text-muted)">No notifications sent yet</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleTarget() {
+  const t = document.getElementById('targetSelect').value;
+  document.getElementById('deptGroup').style.display = t === 'department' ? 'block' : 'none';
+  document.getElementById('studentGroup').style.display = t === 'student' ? 'block' : 'none';
+  document.getElementById('deptSelect').name = t === 'department' ? 'target_value' : 'dept_unused';
+  document.getElementById('studentInput').name = t === 'student' ? 'target_value' : 'student_unused';
+}
+
+function fillTemplate(title, type, message) {
+  document.querySelector('[name=title]').value = title;
+  document.querySelector('[name=message]').value = message;
+  document.querySelector('[name=notif_type]').value = type;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "admin/base_admin.html" %}
+{% block page_title %}Students{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h2>All Students</h2>
+    <p>{{ students|length }} student(s) found</p>
+  </div>
+  <a href="{{ url_for('admin.add_student') }}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Add Student</a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-3">
+  <div class="card-body" style="padding:16px 22px">
+    <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+      <div class="form-group" style="margin:0;flex:1;min-width:180px">
+        <label class="form-label">Search</label>
+        <input type="text" name="search" class="form-control" placeholder="Name or Roll Number" value="{{ request.args.get('search','') }}">
+      </div>
+      <div class="form-group" style="margin:0;min-width:160px">
+        <label class="form-label">Department</label>
+        <select name="dept" class="form-control form-select">
+          <option value="">All Departments</option>
+          {% for d in departments %}<option value="{{ d }}" {{ 'selected' if request.args.get('dept') == d }}>{{ d }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;min-width:100px">
+        <label class="form-label">Year</label>
+        <select name="year" class="form-control form-select">
+          <option value="">All Years</option>
+          {% for y in range(1,5) %}<option value="{{ y }}" {{ 'selected' if request.args.get('year')|int == y }}>Year {{ y }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary" style="height:40px">Filter</button>
+      <a href="{{ url_for('admin.students') }}" class="btn btn-outline" style="height:40px">Clear</a>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Student</th><th>Roll No</th><th>Department</th><th>Year/Sem</th>
+          <th>Phone</th><th>Attendance</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;flex-shrink:0">{{ s.user.full_name[0] }}</div>
+              <div>
+                <div style="font-weight:600">{{ s.user.full_name }}</div>
+                <div style="font-size:12px;color:var(--text-muted)">{{ s.user.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td><code style="background:#f0f0f0;padding:2px 8px;border-radius:5px;font-size:12px">{{ s.roll_number }}</code></td>
+          <td>{{ s.department or '—' }}</td>
+          <td>Year {{ s.year }} / Sem {{ s.semester }}</td>
+          <td>{{ s.phone or '—' }}</td>
+          <td>
+            {% set pct = s.attendance_percentage %}
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="progress-bar" style="width:60px"><div class="progress-fill" style="width:{{ pct }}%;background:{{ '#2e7d32' if pct>=75 else '#e65100' if pct>=60 else '#b71c1c' }}"></div></div>
+              <span style="font-size:12px;font-weight:600;color:{{ '#2e7d32' if pct>=75 else '#b71c1c' }}">{{ pct }}%</span>
+            </div>
+          </td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <a href="{{ url_for('admin.view_student', sid=s.id) }}" class="btn btn-outline btn-sm" title="View"><i class="fas fa-eye"></i></a>
+              <a href="{{ url_for('admin.edit_student', sid=s.id) }}" class="btn btn-primary btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
+              <form method="POST" action="{{ url_for('admin.delete_student', sid=s.id) }}" style="display:inline" onsubmit="return confirm('Delete this student permanently?')">
+                <button type="submit" class="btn btn-danger btn-sm" title="Delete"><i class="fas fa-trash"></i></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">
+          <i class="fas fa-users" style="font-size:40px;opacity:0.2;display:block;margin-bottom:10px"></i>
+          No students found. <a href="{{ url_for('admin.add_student') }}">Add one now</a>.
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
